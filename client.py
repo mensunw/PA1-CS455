@@ -19,5 +19,7 @@ print(f"Connected to {host}:{serverPort}")
 message = "Hello on the other side"
 encodedData = message.encode("utf-8")
 clientSocket.send(encodedData)
+echoMessage = clientSocket.recv(2048)
+print(f"Recieved from server: {echoMessage.decode("utf-8")}")
 
 clientSocket.close()

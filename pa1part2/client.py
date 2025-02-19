@@ -22,11 +22,31 @@ except Exception as e:
 
 try:
   # CSP
+  # get the size of the data
   csp_message = "s rtt 10 1024 0\n"
   clientSocket.send(csp_message.encode("utf-8"))
 
-  echoMessage = clientSocket.recv(2048)
-  print(f"Recieved from server: {echoMessage.decode("utf-8")}")
+  status = clientSocket.recv(2048).decode()
+  
+  if "200" not in status:
+    print(f"Recieved status 404 from server: {status}")
+    clientSocket.close()
+    sys.exit(1)
+  
+  print("CSP done, now moving onto MP")
+
+  # MP
+  probes = 10
+  for probe in range(probes):
+    mp_message = f"m {probe} testing\n"
+    clientSocket.send(mp_message.encode("utf-8"))
+    message = clientSocket.recv(2048).decode()
+    if "404" in message:
+      print(f"Recieved status 404 from server: {message}")
+      clientSocket.close()
+      sys.exit(1)
+    print("recieved: ", message)
+
   clientSocket.close()
 except Exception as e:
   print(f"Error sending/receiving from server socket: {e}")

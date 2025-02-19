@@ -31,6 +31,7 @@ try:
     with newSocket:
       print(f"Le server is now connected to {address}")
       setupMessage = False
+      seqNum = 0
       while True:
         message = newSocket.recv(2028)
         # no msg means client dc'd
@@ -38,39 +39,70 @@ try:
           print("Client dc'd")
           break
         decodedMessage = message.decode('utf-8')
+        parsedMessage = decodedMessage.split(" ")
         invalid = False
 
-        print(decodedMessage)
+        print("msg: ", decodedMessage)
         # CSP
         # check if we recieved setup message yet
         if setupMessage == False:
-          # if not, then assume it's the current message
-          parsedMessage = decodedMessage.split(" ")
+          # if not, then it has to be the current message
           if parsedMessage[0] != "s":
             # if the current message is not setup, then this is invalid
             invalid = True
           else:
             # it's a setup connection, as it should be
 
-            empty = False
             # content is not empty check
             for item in parsedMessage:
-              if item == " " or "\n":
-                empty = True
+              if item == " " or item == "\n":
+                invalid = True
             # check validity (length check)
-            if (empty) or (not(len(parsedMessage) == 5)):
+            if not(len(parsedMessage) == 5):
               invalid = True
-            else:
-              # send OK status
+            
+            # made it all the way here and it's valid, then good to go
+            if not invalid:
+              # send OK status and set setup to true
+              setupMessage = True
               newSocket.send(("200 OK: Ready").encode())
               continue
-        # if setup message is invalidated (should have been setup msg but is not or incorrect parsing format)
-        if invalid:
-          newSocket.send(("404 ERROR: Invalid Connetion SetupMessage").encode())
-          break
+            # if setup message is invalidated (should have been setup msg but is not or incorrect parsing format)
+            else:
+              newSocket.send(("404 ERROR: Invalid Connection SetupMessage").encode())
+              break
         
-        # send back the same data
-        newSocket.send(decodedMessage.encode())
+        # MP
+        if parsedMessage[0] == "m":
+          # check validity 
+          invalid = False
+          # content is not empty check
+          for item in parsedMessage:
+            if item == " " or item == "\n":
+              invalid = True
+          # check validity (length check)
+          if not(len(parsedMessage) == 3):
+            invalid = True
+
+          # check sequence number
+          if int(parsedMessage[1]) == seqNum:
+            seqNum += 1
+          else:
+            invalid = True
+
+          # if invalidated send back error
+          if invalid:
+            newSocket.send(("404 ERROR: Invalid Measurement Message").encode())
+            break
+          
+          # echo back message
+          newSocket.send(parsedMessage[2].encode())
+        else:
+          newSocket.send(("ERROR").encode())
+          break
+    # temp
+    print("temp exit")
+    sys.exit(0)
 except Exception as e:
   print(f"Error listening/communicating with client socket: {e}")
   sys.exit(1)

@@ -70,7 +70,7 @@ for size in sizes:
       # note starting time
       starting_time = time.time()
       mp_message = f"m {probe} {content}\n"
-      print(mp_message)
+      #print(mp_message)
       clientSocket.send(mp_message.encode("utf-8"))
       message = clientSocket.recv(buffer_size).decode()
       # note ending time
@@ -106,6 +106,7 @@ for size in sizes:
     ctp_message = f"t\n"
     clientSocket.send(ctp_message.encode("utf-8"))
     # get status from server
+    print("status for termination:", status)
     status = clientSocket.recv(buffer_size).decode()
     # close either way
     if "200" not in status:

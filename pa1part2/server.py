@@ -71,8 +71,8 @@ try:
               setupMessage = True
               # remove the \n
               delay = float(parsedMessage[4].strip())
-              print("sent OKAY")
               newSocket.send(("200 OK: Ready").encode())
+              print("sent OKAY")
               continue
             # if setup message is invalidated (should have been setup msg but is not or incorrect parsing format)
             else:

@@ -1,5 +1,6 @@
 from socket import *
 import sys
+import time
 
 # get server port input from user
 try:
@@ -22,7 +23,7 @@ try:
   # listen to connections
   serverSocket.listen(5)
   # buffer size for recieving
-  buffer_size = 32000
+  buffer_size = 33000
   print(f"Le server is now listening on host {host}:{serverPort}")
   while True:
 
@@ -34,6 +35,7 @@ try:
       print(f"Le server is now connected to {address}")
       setupMessage = False
       seqNum = 0
+      delay = 0
       while True:
         message = newSocket.recv(buffer_size)
         # no msg means client dc'd
@@ -44,7 +46,7 @@ try:
         parsedMessage = decodedMessage.split(" ")
         invalid = False
 
-        print("msg: ", decodedMessage)
+        #print("msg: ", decodedMessage)
         # CSP
         # check if we recieved setup message yet
         if setupMessage == False:
@@ -65,8 +67,10 @@ try:
             
             # made it all the way here and it's valid, then good to go
             if not invalid:
-              # send OK status and set setup to true
+              # send OK status and set setup to true and set delay
               setupMessage = True
+              # remove the \n
+              delay = float(parsedMessage[4].strip())
               newSocket.send(("200 OK: Ready").encode())
               continue
             # if setup message is invalidated (should have been setup msg but is not or incorrect parsing format)
@@ -97,7 +101,8 @@ try:
             newSocket.send(("404 ERROR: Invalid Measurement Message").encode())
             break
           
-          # echo back message
+          # echo back message after sleeping the delay
+          time.sleep(delay)
           newSocket.send(parsedMessage[2].encode())
         # CTP
         elif parsedMessage[0] == "t\n":

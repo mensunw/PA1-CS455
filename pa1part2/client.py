@@ -11,11 +11,14 @@ except:
   sys.exit(1)
 
 # size in bytes for message content
-sizes = [1, 100, 200, 400, 800, 1000]
+#sizes = [1, 100, 200, 400, 800, 1000]
+sizes = [1000, 2000, 4000, 8000, 16000, 32000]
 # probes used for iterating
-probes = 10
+probes = 100
 # buffer size for recieving
-buffer_size = 32000
+buffer_size = 33000
+# server delay 
+delay = 0 # 0, 0.1, 0.2
 for size in sizes:
   # for EACH size generate content of that size
   print("----------------------------------------")
@@ -35,7 +38,7 @@ for size in sizes:
   try:
     # CSP
     # get the byte size of the data
-    csp_message = f"s rtt 10 {size} 0\n"
+    csp_message = f"s rtt 10 {size} {delay}\n"
     clientSocket.send(csp_message.encode("utf-8"))
     # get status from server
     status = clientSocket.recv(buffer_size).decode()
@@ -70,15 +73,17 @@ for size in sizes:
       total_rtt += rtt
       # note time passed
       passed_time = ending_time - starting_time
+      total_time += passed_time
     avg_rtt = total_rtt / probes
     avg_throughput = 0
     # incase barely any change
     if((total_time / probes) == 0):
       avg_throughput = 0
     else:
-      avg_throughput = (size / (total_time / probes)) 
+      # divide at the end to convert to mb/ps for easier reading
+      avg_throughput = (size / (total_time / probes) / (1024 * 1024)) 
     print(f"Average RTT: {avg_rtt}ms")
-    print(f"Average Throughput: {avg_throughput}Bps")
+    print(f"Average Throughput: {avg_throughput}Mbps")
     
     #print("MP done, now moving onto CTP")
 

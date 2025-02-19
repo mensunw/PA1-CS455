@@ -46,7 +46,7 @@ try:
         parsedMessage = decodedMessage.split(" ")
         invalid = False
 
-        print("msg: ", decodedMessage)
+        #print("msg: ", decodedMessage)
         # CSP
         # check if we recieved setup message yet
         if setupMessage == False:
@@ -72,7 +72,6 @@ try:
               # remove the \n
               delay = float(parsedMessage[4].strip())
               newSocket.send(("200 OK: Ready").encode())
-              print("sent OKAY")
               continue
             # if setup message is invalidated (should have been setup msg but is not or incorrect parsing format)
             else:

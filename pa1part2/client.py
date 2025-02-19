@@ -6,6 +6,11 @@ import time
 try:
   host = sys.argv[1]
   serverPort = int(sys.argv[2])
+  # get measurement type (0 = rtt, 1 = tput)
+  measurementNum = int(sys.argv[3])
+  if(measurementNum != 0 or measurementNum != 1):
+    print("Error: measure must must be 0 or 1")
+    sys.exit(1)
 except:
   print("Error recieving host & server port (did you input a host & port number?)")
   sys.exit(1)
@@ -14,11 +19,17 @@ except:
 sizes = [1, 100, 200, 400, 800, 1000]
 #sizes = [1000, 2000, 4000, 8000, 16000, 32000]
 # probes used for iterating
-probes = 10
+probes = 100
 # buffer size for recieving
 buffer_size = 33000
 # server delay 
 delay = 0 # 0, 0.1, 0.2
+# measurement type
+measurement = ""
+if(measurementNum == 0):
+  measurement = "rtt"
+else:
+  measurement = "tput"
 for size in sizes:
   # for EACH size generate content of that size
   print("----------------------------------------")
@@ -38,7 +49,7 @@ for size in sizes:
   try:
     # CSP
     # get the byte size of the data
-    csp_message = f"s rtt {probes} {size} {delay}\n"
+    csp_message = f"s {measurement} {probes} {size} {delay}\n"
     clientSocket.send(csp_message.encode("utf-8"))
     # get status from server
     status = clientSocket.recv(buffer_size).decode()
@@ -83,8 +94,10 @@ for size in sizes:
     else:
       # divide at the end to convert to mb/ps for easier reading
       avg_throughput = (size / (total_time / probes) / (1024 * 1024)) 
-    print(f"Average RTT: {avg_rtt}ms")
-    print(f"Average Throughput: {avg_throughput}Mbps")
+    if(measurement == "rtt"):
+      print(f"Average RTT: {avg_rtt}ms")
+    if(measurement == "tput"):
+      print(f"Average Throughput: {avg_throughput}Mbps")
     
     #print("MP done, now moving onto CTP")
 

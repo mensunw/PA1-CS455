@@ -103,7 +103,7 @@ try:
           
           # echo back message after sleeping the delay
           time.sleep(delay)
-          print("sent: ", parsedMessage[2])
+          #print("sent: ", parsedMessage[2])
           newSocket.send(parsedMessage[2].encode())
         # CTP
         elif parsedMessage[0] == "t\n":

@@ -8,7 +8,7 @@ try:
   serverPort = int(sys.argv[2])
   # get measurement type (0 = rtt, 1 = tput)
   measurementNum = int(sys.argv[3])
-  if(measurementNum != 0 or measurementNum != 1):
+  if(measurementNum != 0 and measurementNum != 1):
     print("Error: measure must must be 0 or 1")
     sys.exit(1)
 except:
@@ -16,8 +16,7 @@ except:
   sys.exit(1)
 
 # size in bytes for message content
-sizes = [1, 100, 200, 400, 800, 1000]
-#sizes = [1000, 2000, 4000, 8000, 16000, 32000]
+sizes = []
 # probes used for iterating
 probes = 100
 # buffer size for recieving
@@ -28,8 +27,10 @@ delay = 0 # 0, 0.1, 0.2
 measurement = ""
 if(measurementNum == 0):
   measurement = "rtt"
+  sizes = [1, 100, 200, 400, 800, 1000]
 else:
   measurement = "tput"
+  sizes = [1000, 2000, 4000, 8000, 16000, 32000]
 for size in sizes:
   # for EACH size generate content of that size
   print("----------------------------------------")
@@ -69,7 +70,7 @@ for size in sizes:
       # note starting time
       starting_time = time.time()
       mp_message = f"m {probe} {content}\n"
-      print(mp_message)
+      #print(mp_message)
       clientSocket.send(mp_message.encode("utf-8"))
       message = clientSocket.recv(buffer_size).decode()
       # note ending time

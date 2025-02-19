@@ -11,10 +11,10 @@ except:
   sys.exit(1)
 
 # size in bytes for message content
-#sizes = [1, 100, 200, 400, 800, 1000]
-sizes = [1000, 2000, 4000, 8000, 16000, 32000]
+sizes = [1, 100, 200, 400, 800, 1000]
+#sizes = [1000, 2000, 4000, 8000, 16000, 32000]
 # probes used for iterating
-probes = 100
+probes = 10
 # buffer size for recieving
 buffer_size = 33000
 # server delay 
@@ -38,7 +38,7 @@ for size in sizes:
   try:
     # CSP
     # get the byte size of the data
-    csp_message = f"s rtt 10 {size} {delay}\n"
+    csp_message = f"s rtt {probes} {size} {delay}\n"
     clientSocket.send(csp_message.encode("utf-8"))
     # get status from server
     status = clientSocket.recv(buffer_size).decode()
@@ -54,10 +54,11 @@ for size in sizes:
     # for each probe, send the message along with the increasing seq number
     total_rtt = 0
     total_time = 0
-    for probe in range(probes):
+    for probe in range(1, probes+1):
       # note starting time
       starting_time = time.time()
       mp_message = f"m {probe} {content}\n"
+      print(mp_message)
       clientSocket.send(mp_message.encode("utf-8"))
       message = clientSocket.recv(buffer_size).decode()
       # note ending time

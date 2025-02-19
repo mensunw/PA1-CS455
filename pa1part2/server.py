@@ -34,7 +34,7 @@ try:
     with newSocket:
       print(f"Le server is now connected to {address}")
       setupMessage = False
-      seqNum = 0
+      seqNum = 1
       delay = 0
       while True:
         message = newSocket.recv(buffer_size)

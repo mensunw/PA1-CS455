@@ -37,6 +37,7 @@ try:
           print("Client dc'd")
           break
         decodedMessage = message.decode('utf-8')
+        # send back the same data
         newSocket.send(decodedMessage.encode())
 except Exception as e:
   print(f"Error listening/communicating with client socket: {e}")

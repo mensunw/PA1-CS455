@@ -46,7 +46,7 @@ try:
         parsedMessage = decodedMessage.split(" ")
         invalid = False
 
-        #print("msg: ", decodedMessage)
+        print("msg: ", decodedMessage)
         # CSP
         # check if we recieved setup message yet
         if setupMessage == False:
@@ -103,6 +103,7 @@ try:
           
           # echo back message after sleeping the delay
           time.sleep(delay)
+          print("sent: ", parsedMessage[2])
           newSocket.send(parsedMessage[2].encode())
         # CTP
         elif parsedMessage[0] == "t\n":

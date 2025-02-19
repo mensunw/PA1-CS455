@@ -12,7 +12,7 @@ except Exception as e:
 try:
   # create server socket
   serverSocket = socket(AF_INET, SOCK_STREAM)
-  host = "127.0.0.1"
+  host = "csa2.bu.edu"
   serverSocket.bind((host, serverPort))
 except Exception as e:
   print(f"Error creating server socket: {e}")

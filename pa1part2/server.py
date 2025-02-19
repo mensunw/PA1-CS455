@@ -21,6 +21,8 @@ except Exception as e:
 try:
   # listen to connections
   serverSocket.listen(5)
+  # buffer size for recieving
+  buffer_size = 32000
   print(f"Le server is now listening on host {host}:{serverPort}")
   while True:
 
@@ -33,7 +35,7 @@ try:
       setupMessage = False
       seqNum = 0
       while True:
-        message = newSocket.recv(2028)
+        message = newSocket.recv(buffer_size)
         # no msg means client dc'd
         if not message:
           print("Client dc'd")
@@ -97,12 +99,33 @@ try:
           
           # echo back message
           newSocket.send(parsedMessage[2].encode())
+        # CTP
+        elif parsedMessage[0] == "t\n":
+          # check validity
+          invalid = False
+          # content is not empty check
+          for item in parsedMessage:
+            if item == " " or item == "\n":
+              invalid = True
+          # check validity (length check)
+          if not(len(parsedMessage) == 1):
+            invalid = True
+
+          # if invalidated send back error
+          if invalid:
+            newSocket.send(("404 ERROR: Invalid Connection Termination Message").encode())
+            break
+
+          # if valid, send back success and then close
+          newSocket.send(("200 OK: Closing Connection").encode())
+          break
+        # not CSP with setUp = False, MP, or CTP
         else:
-          newSocket.send(("ERROR").encode())
+          newSocket.send(("404 ERROR").encode())
           break
     # temp
-    print("temp exit")
-    sys.exit(0)
+    #print("temp exit")
+    #sys.exit(0)
 except Exception as e:
   print(f"Error listening/communicating with client socket: {e}")
   sys.exit(1)

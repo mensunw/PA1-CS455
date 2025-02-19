@@ -1,5 +1,6 @@
 from socket import *
 import sys
+import time
 
 # get server host name/ipaddr and server port input from user
 try:
@@ -9,45 +10,90 @@ except:
   print("Error recieving host & server port (did you input a host & port number?)")
   sys.exit(1)
 
-try:
-  # create client socket
-  clientSocket = socket(AF_INET, SOCK_STREAM)
+# size in bytes for message content
+sizes = [1, 100, 200, 400, 800, 1000]
+# probes used for iterating
+probes = 10
+# buffer size for recieving
+buffer_size = 32000
+for size in sizes:
+  # for EACH size generate content of that size
+  print("----------------------------------------")
+  print(f"Size: {size}")
+  content = "C" * size
+  try:
+    # create client socket
+    clientSocket = socket(AF_INET, SOCK_STREAM)
 
-  # connect socket
-  clientSocket.connect((host, serverPort))
-  print(f"Connected to {host}:{serverPort}")
-except Exception as e:
-  print(f"Error connecting client socket to server: {e}")
-  sys.exit(1)
-
-try:
-  # CSP
-  # get the size of the data
-  csp_message = "s rtt 10 1024 0\n"
-  clientSocket.send(csp_message.encode("utf-8"))
-
-  status = clientSocket.recv(2048).decode()
-  
-  if "200" not in status:
-    print(f"Recieved status 404 from server: {status}")
-    clientSocket.close()
+    # connect socket
+    clientSocket.connect((host, serverPort))
+    #print(f"Connected to {host}:{serverPort}")
+  except Exception as e:
+    print(f"Error connecting client socket to server: {e}")
     sys.exit(1)
-  
-  print("CSP done, now moving onto MP")
 
-  # MP
-  probes = 10
-  for probe in range(probes):
-    mp_message = f"m {probe} testing\n"
-    clientSocket.send(mp_message.encode("utf-8"))
-    message = clientSocket.recv(2048).decode()
-    if "404" in message:
-      print(f"Recieved status 404 from server: {message}")
+  try:
+    # CSP
+    # get the byte size of the data
+    csp_message = f"s rtt 10 {size} 0\n"
+    clientSocket.send(csp_message.encode("utf-8"))
+    # get status from server
+    status = clientSocket.recv(buffer_size).decode()
+    # if error status, close and exit
+    if "200" not in status:
+      print(f"Recieved error from server: {status}")
       clientSocket.close()
       sys.exit(1)
-    print("recieved: ", message)
+    
+    #print("CSP done, now moving onto MP")
 
-  clientSocket.close()
-except Exception as e:
-  print(f"Error sending/receiving from server socket: {e}")
-  sys.exit(1)
+    # MP
+    # for each probe, send the message along with the increasing seq number
+    total_rtt = 0
+    total_time = 0
+    for probe in range(probes):
+      # note starting time
+      starting_time = time.time()
+      mp_message = f"m {probe} {content}\n"
+      clientSocket.send(mp_message.encode("utf-8"))
+      message = clientSocket.recv(buffer_size).decode()
+      # note ending time
+      ending_time = time.time()
+
+      # if error contained in message, then close and exit
+      if "404" in message:
+        print(f"Recieved error from server: {message}")
+        clientSocket.close()
+        sys.exit(1)
+      # note the rtt for this probe (multiplying it by 1000 to conver to ms for easier read)
+      rtt = (ending_time - starting_time) * 1000
+      total_rtt += rtt
+      # note time passed
+      passed_time = ending_time - starting_time
+    avg_rtt = total_rtt / probes
+    avg_throughput = 0
+    # incase barely any change
+    if((total_time / probes) == 0):
+      avg_throughput = 0
+    else:
+      avg_throughput = (size / (total_time / probes)) 
+    print(f"Average RTT: {avg_rtt}ms")
+    print(f"Average Throughput: {avg_throughput}Bps")
+    
+    #print("MP done, now moving onto CTP")
+
+    # CTP
+    ctp_message = f"t\n"
+    clientSocket.send(ctp_message.encode("utf-8"))
+    # get status from server
+    status = clientSocket.recv(buffer_size).decode()
+    # close either way
+    if "200" not in status:
+      print(f"Recieved error from server: {status}")
+      clientSocket.close()
+      sys.exit(1)
+    #print("CTP successfully terminated")
+    clientSocket.close()
+  except Exception as e:
+    print(f"Error sending/receiving from server socket: {e}")
+    sys.exit(1)

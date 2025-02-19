@@ -18,7 +18,7 @@ except:
 # size in bytes for message content
 sizes = []
 # probes used for iterating
-probes = 100
+probes = 1
 # buffer size for recieving
 buffer_size = 33000
 # server delay 
@@ -70,7 +70,7 @@ for size in sizes:
       # note starting time
       starting_time = time.time()
       mp_message = f"m {probe} {content}\n"
-      #print(mp_message)
+      print(mp_message)
       clientSocket.send(mp_message.encode("utf-8"))
       message = clientSocket.recv(buffer_size).decode()
       # note ending time

@@ -9,7 +9,7 @@ def recv_full_message(sock):
     '''
     msg = ""
     while True:
-        msg_chunk = sock.recv(buffer_size).decode()
+        msg_chunk = sock.recv(buffer_size).decode('utf-8')
         # nothing being received means connection is closed
         if not msg_chunk:  
           print("Client dc'd (1)")
@@ -55,12 +55,11 @@ try:
       seqNum = 1
       delay = 0
       while True:
-        message = recv_full_message(newSocket)
+        decodedMessage = recv_full_message(newSocket)
         # no msg means client dc'd
-        if not message:
+        if not decodedMessage:
           print("Client dc'd (2)")
           break
-        decodedMessage = message.decode('utf-8')
         parsedMessage = decodedMessage.split(" ")
         invalid = False
 

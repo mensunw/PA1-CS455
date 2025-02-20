@@ -9,7 +9,7 @@ def recv_full_message(sock):
     '''
     msg = ""
     while True:
-        msg_chunk = sock.recv(buffer_size).decode()
+        msg_chunk = sock.recv(buffer_size).decode("utf-8")
         # nothing being received means connection is closed
         if not msg_chunk:  
           break

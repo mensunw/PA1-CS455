@@ -21,7 +21,7 @@ except Exception as e:
 
 try:
   # listen to connections
-  serverSocket.listen(5)
+  serverSocket.listen(1)
   # buffer size for recieving
   buffer_size = 33000
   print(f"Le server is now listening on host {host}:{serverPort}")

@@ -37,11 +37,11 @@ except Exception as e:
   print(f"Error creating server socket: {e}")
   sys.exit(1)
 
+# buffer size for recieving
+buffer_size = 33000
 try:
   # listen to connections
   serverSocket.listen(1)
-  # buffer size for recieving
-  buffer_size = 33000
   print(f"Le server is now listening on host {host}:{serverPort}")
   while True:
 

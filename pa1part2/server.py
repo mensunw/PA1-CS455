@@ -63,7 +63,7 @@ try:
         parsedMessage = decodedMessage.split(" ")
         invalid = False
 
-        print("msg: ", decodedMessage)
+        #print("msg: ", decodedMessage)
         # CSP
         # check if we recieved setup message yet
         if setupMessage == False:

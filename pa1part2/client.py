@@ -2,6 +2,23 @@ from socket import *
 import sys
 import time
 
+def recv_full_message(sock):
+    '''
+    creating this lil helper function to help with retrieving ENTIRE message from server
+    in cases where the msg too big
+    '''
+    msg = ""
+    while True:
+        msg_chunk = sock.recv(buffer_size).decode()
+        # nothing being received means connection is closed
+        if not msg_chunk:  
+          break
+        msg += msg_chunk
+        # once \n is recieved, we know it's end of message
+        if "\n" in msg_chunk:  
+          break
+    return msg
+
 # get server host name/ipaddr and server port input from user
 try:
   host = sys.argv[1]
@@ -30,7 +47,7 @@ if(measurementNum == 0):
   sizes = [1, 100, 200, 400, 800, 1000]
 else:
   measurement = "tput"
-  sizes = [1000, 2000, 4000, 8000, 16000, 32000]
+  sizes = [1000, 1450, 1457, 8000, 16000, 32000]
 for size in sizes:
   # for EACH size generate content of that size
   print("----------------------------------------")
@@ -72,7 +89,8 @@ for size in sizes:
       mp_message = f"m {probe} {content}\n"
       #print(mp_message)
       clientSocket.send(mp_message.encode("utf-8"))
-      message = clientSocket.recv(buffer_size).decode()
+      # call helper function for recieving full msg (thanks bu server limiter -_-)
+      message = recv_full_message(clientSocket)
       # note ending time
       ending_time = time.time()
 
@@ -106,8 +124,8 @@ for size in sizes:
     ctp_message = f"t\n"
     clientSocket.send(ctp_message.encode("utf-8"))
     # get status from server
-    print("status for termination:", status)
     status = clientSocket.recv(buffer_size).decode()
+    print("status for termination:", status)
     # close either way
     if "200" not in status:
       print(f"Recieved error from server: {status}")

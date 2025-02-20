@@ -2,6 +2,24 @@ from socket import *
 import sys
 import time
 
+def recv_full_message(sock):
+    '''
+    creating this lil helper function to help with retrieving ENTIRE message from server
+    in cases where the msg too big
+    '''
+    msg = ""
+    while True:
+        msg_chunk = sock.recv(buffer_size).decode()
+        # nothing being received means connection is closed
+        if not msg_chunk:  
+          print("Client dc'd (1)")
+          break
+        msg += msg_chunk
+        # once \n is recieved, we know it's end of message
+        if "\n" in msg_chunk:  
+          break
+    return msg
+
 # get server port input from user
 try:
   serverPort = int(sys.argv[1])
@@ -37,10 +55,10 @@ try:
       seqNum = 1
       delay = 0
       while True:
-        message = newSocket.recv(buffer_size)
+        message = recv_full_message(newSocket)
         # no msg means client dc'd
         if not message:
-          print("Client dc'd")
+          print("Client dc'd (2)")
           break
         decodedMessage = message.decode('utf-8')
         parsedMessage = decodedMessage.split(" ")

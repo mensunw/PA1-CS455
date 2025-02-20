@@ -25,6 +25,8 @@ try:
   serverPort = int(sys.argv[2])
   # get measurement type (0 = rtt, 1 = tput)
   measurementNum = int(sys.argv[3])
+  # get server delay
+  delay = float(sys.argv[4])
   if(measurementNum != 0 and measurementNum != 1):
     print("Error: measure must must be 0 or 1")
     sys.exit(1)
@@ -35,11 +37,9 @@ except:
 # size in bytes for message content
 sizes = []
 # probes used for iterating
-probes = 1
+probes = 10
 # buffer size for recieving
 buffer_size = 33000
-# server delay 
-delay = 0 # 0, 0.1, 0.2
 # measurement type
 measurement = ""
 if(measurementNum == 0):
@@ -47,7 +47,7 @@ if(measurementNum == 0):
   sizes = [1, 100, 200, 400, 800, 1000]
 else:
   measurement = "tput"
-  sizes = [1000, 1450, 1457, 8000, 16000, 32000]
+  sizes = [1000, 2000, 4000, 8000, 16000, 32000]
 for size in sizes:
   # for EACH size generate content of that size
   print("----------------------------------------")
@@ -125,7 +125,7 @@ for size in sizes:
     clientSocket.send(ctp_message.encode("utf-8"))
     # get status from server
     status = clientSocket.recv(buffer_size).decode()
-    print("status for termination:", status)
+    #print("status for termination:", status)
     # close either way
     if "200" not in status:
       print(f"Recieved error from server: {status}")
